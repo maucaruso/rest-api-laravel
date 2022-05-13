@@ -28,3 +28,13 @@ Route::get('/test', function (Request $request) {
     $response->header('Content-Type', 'application/json');
     return $response;
 });
+
+// Products Route
+Route::namespace('App\\Http\\Controllers\\Api\\')->prefix('products')->group(function () {
+    Route::get('/', 'ProductController@index');
+    Route::get('/{id}', 'ProductController@show');
+    Route::post('/', 'ProductController@save');
+    Route::put('/', 'ProductController@update');
+    Route::patch('/', 'ProductController@update');
+    Route::delete('/{id}', 'ProductController@delete');
+});

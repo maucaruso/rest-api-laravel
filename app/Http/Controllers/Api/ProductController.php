@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ProductRequest;
 use App\Http\Resources\ProductCollection;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
+use App\Repository\ProductRepository;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -17,12 +19,21 @@ class ProductController extends Controller
         $this->product = $product;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $products = $this->product->paginate(1);
+        $products = $this->product;
+        $productRepository = new ProductRepository($products);
+
+        if ($request->has('conditions')) {
+            $productRepository->selectConditions($request->get('conditions'));
+        }
+
+        if ($request->has('fields')) {
+            $productRepository->selectFilter($request->get('fields'));
+        }
 
         //return response()->json($products);
-        return new ProductCollection($products);
+        return new ProductCollection($productRepository->getResult()->paginate(10));
     }
 
     public function show($id)
@@ -33,7 +44,7 @@ class ProductController extends Controller
         return new ProductResource($product);
     }
 
-    public function save(Request $request)
+    public function save(ProductRequest $request)
     {
         $data = $request->all();
         $product = $this->product->create($data);
